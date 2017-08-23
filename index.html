@@ -1,0 +1,86 @@
+<head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.4.11/d3.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+<script src="FileSaver.min.js"></script>
+<script src="app.js"></script>
+<style> 
+input::placeholder {color:black;}
+#History:hover #History_Hover {display: block;visibility:visible}
+#History_Hover {display: block; visibility: hidden; top: 0px; left: 0px; position: relative; width: 400px; height: 400px; background-color: black;z-index:1;}
+#SDT_JUDD:hover #SDT_JUDD_Hover {visibility:visible}
+#SDT_JUDD_Hover {display: block; visibility:hidden; top: 0px; left: 0px; position: relative; width: 400px; height: 400px; background-color: black;z-index:1;}
+.textarea {display:block; padding: auto auto;margin: auto auto;}
+div {display:table-cell; vertical-align:"middle";contenteditable:true}
+textarea {  resize: none;
+  outline: none;
+  border: 2px solid;
+  display: block;
+  width: 100%;
+  padding: 0;
+  position: absolute;
+  top: 0;
+  font-family: sans-serif;
+  font-size: 20px;
+  text-align: center;}
+</style>
+</head>
+<body>
+<pre id='layout' style="display:none" >
+text,x,y,width,height,color,type
+SiteID,0,20,125,50,green,input
+Current,0,70,125,20,green,button
+Feeback,125,20,125,100,green,input
+Modem_Model,250,20,150,100,green,rect
+Subscription,400,20,150,100,green,button
+Last7days,550,20,100,100,green,rect
+GwCongestion,650,20,100,50,green,button
+AccountLocked,750,20,100,50,green,rect
+SDT_JUDD,125,120,125,30,green,button
+History,0,100,125,20,green,button
+Reboot,250,120,150,30,green,button
+Usage,400,120,150,30,green,rect
+VideoDataSaver,550,120,100,30,green,button
+BeamCongestion,650,70,100,50,green,button
+FAP,750,70,100,50,green,rect
+Email,0,220,150,80,green,rect
+Browsing,150,220,200,40,green,button
+Streaming,350,220,200,80,green,button
+UL/DL,550,220,150,80,green,button
+VOIP,700,220,150,80,green,button
+Http,150,260,100,40,green,button
+Https,250,260,100,40,green,button
+End-to-end_Connection,0,315,850,50,green,button
+InternetBB,0,450,100,50,green,button
+Gateway,100,400,120,50,green,button
+GwAirLink,205,450,100,50,green,button
+Satellite,305,400,100,200,green,button
+BeamAirLink,405,450,100,50,green,button
+PEPLink,405,550,100,50,green,button
+IPGW,100,450,150,30,green,vbutton
+DNS,130,450,150,30,green,vbutton
+WAS,160,450,150,30,green,vbutton
+CRO,190,450,150,30,green,vbutton
+PowerSupply,585,450,100,20,green,vbutton
+Statecode,505,400,100,50,green,button
+ANT,505,450,150,20,green,vbutton
+ODU,525,450,150,20,green,vbutton
+IFL,545,450,150,20,green,vbutton
+IDU,565,450,150,20,green,vbutton
+ATA,585,550,50,20,green,vbutton
+WifiLink,605,430,100,30,green,button
+EthLink,605,480,100,30,green,button
+TelLink,605,530,100,30,green,button
+Device1,705,400,145,20,green,button
+Device2,705,420,145,20,green,button
+Device3,705,440,145,20,green,button
+Device4,705,460,145,20,green,button
+Device5,705,480,145,20,green,button
+Device6,705,500,145,20,green,button
+Device7,705,520,145,20,green,button
+Device8,705,540,145,20,green,button
+Device9,705,560,145,20,green,button
+Device10,705,580,145,20,green,button
+rawdata,900,20,400,200,white,textarea
+rawtable,900,220,400,200,white,div
+</pre>
+</body>
