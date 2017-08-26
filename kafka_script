@@ -1,0 +1,23 @@
+sudo zookeeper-server-start -daemon /etc/kafka/zookeeper.properties
+sudo kafka-server-start -daemon /etc/kafka/server.properties
+sudo schema-registry-start -daemon /etc/schema-registry/schema-registry.properties
+sudo kafka-rest-start -daemon
+java -cp KafkaOffsetMonitor-assembly-0.2.1.jar com.quantifind.kafka.offsetapp.OffsetGetterWeb --zk localhost:2181 --port 8083 --refresh 10.seconds --retain 2.days
+curl -i -N -H "Connection: Upgrade" -H "Upgrade: websocket" -H "Host: echo.websocket.org" -H "Origin: http://www.websocket.org" http://echo.websocket.org
+kafka-topics --list --zookeeper localhost:2181
+kafka-topics --if-not-exists --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic test
+kafka-console-producer --broker-list localhost:9092 --topic test
+kafka-console-consumer --new-consumer --bootstrap-server localhost:9092 --from-beginning --topic test
+kafka-topics --if-exists --delete --zookeeper localhost:2181 --topic test
+connect-standalone config/connect-standalone.properties config/connect-file-source.properties config/connect-file-sink.properties
+kafka-run-class kafka.admin.TopicCommand --zookeeper localhost:2181 --delete --topic DSS8022797 
+
+netstat -lnput |grep 9092
+netstat -lnput |grep 2821
+netstat -lnput |grep 8082
+curl http://localhost:8082/topics
+curl -X POST -H "Content-Type: application/vnd.kafka.v1+json"  --data '{"format": "json", "auto.offset.reset": "smallest"}' http://localhost:8082/consumers/my_json_consumer
+curl -X GET -H "Accept: application/vnd.kafka.json.v1+json" http://localhost:8082/consumers/my_json_consumer/instances/rest-consumer-11561681-8ba5-4b46-bed0-905ae1769bc6/topics/test
+
+curl -X POST -H "Content-Type: application/vnd.kafka.v2+json" --data '{"topics":["test"]}' http://localhost:8082/consumers/my_json_consumer/instances/my_consumer_instance/subscription
+curl -X GET -H "Accept: application/vnd.kafka.json.v2+json" http://localhost:8082/consumers/my_json_consumer/instances/my_consumer_instance/records

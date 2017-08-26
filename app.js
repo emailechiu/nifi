@@ -93,6 +93,7 @@ function Current() {
       san = document.getElementById('SiteID').value;
       console.log(san);
       ws.send(san);
+      d3.select('#rawtable').html('<iframe src=http://'+san+'.terminal.jupiter.hnops.net style="display:block"></iframe>')
     };
 
     ws.onmessage = function(evt) {

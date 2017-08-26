@@ -1,0 +1,21 @@
+#curl http://localhost:8082/topics
+# kafka-console-consumer --bootstrap-server localhost:9092 --from-beginning --topic $1
+#curl -X DELETE -H "Content-Type: application/vnd.kafka.v1+json"  http://localhost:8082/consumers/my_json_consumer/instances/echi
+#a=$(curl -X POST -H "Content-Type: application/vnd.kafka.v1+json"  --data '{"format": "json", "auto.offset.reset": "smallest", "auto.commit.enable":"false"}' http://localhost:8082/consumers/my_json_consumer |grep -Po "base_uri\":\"\K[^\"]*"); 
+#echo $a
+#curl -X GET -H "Accept: application/vnd.kafka.json.v1+json" $a/topics/$1; 
+#curl -X DELETE -H "Content-Type: application/vnd.kafka.v1+json" $a 
+#curl -i -N -H "Connection: Upgrade" -H "Upgrade: websocket" -H "Host: echo.websocket.org" -H "Origin: http://www.websocket.org" http://echo.websocket.org
+echo line1
+b=$(curl -X POST -H "Content-Type: application/vnd.kafka.v2+json"  --data '{"format": "avro", "auto.offset.reset": "earliest" }' http://localhost:8082/consumers/$2 |grep -Po "base_uri\":\"\K[^\"]*")
+#echo $b; echo $1; echo $b/topics/$1
+#curl -H "Content-Type: application/vnd.kafka.v2+json" --data "{\"topics\":[\"$1\"]}" https://httpbin.org/post 
+echo line2 $b
+curl -H "Content-Type: application/vnd.kafka.v2+json" --data "{\"topics\":[\"$1\"]}" $b/subscription
+#curl -X POST -H "Content-Type: application/vnd.kafka.v2+json" $b/subscription/topics/$1
+echo line3
+curl -i -N --keepalive-time 1 --keepalive -X GET -H "Accept: application/vnd.kafka.avro.v2+json" $b/records
+#curl -X GET -H "Accept: application/vnd.kafka.json.v2+json" $b/topics/$1
+echo line4
+curl -X DELETE -H "Content-Type: application/vnd.kafka.v2+json" $b
+
