@@ -105,7 +105,9 @@ function reinit(){
     d3.selectAll('textarea').html("");
     d3.selectAll('button').style('background-color','black');
     d3.selectAll('rect').style('background-color','black');
-    $("[id^=Device]").each(function(){$(this).html($(this).prop('id'))})
+    $("[id^=Device]").each(function(){$(this).html('')})
+    $("[id^=Device]").each(function(){$(this).css('background-color', 'white')})
+    //$("[id^=Device]").each(function(){$(this).html($(this).prop('id'))})
 }
 
 function SiteID(e) {
@@ -160,8 +162,8 @@ function color_fails(message) {
 function update(key,val) {
     console.log("setting",key,"to",val);
     if (val=="green" || val=="red" || val=="orange" ||val=="grey" || val=="black" ) document.getElementById(key).style.backgroundColor=val;
-    else if (key=="Statecode" && (val=="green" ||val=="orange"||val=="grey"||val=="black")) document.getElementById("Statecode").style.backgroundColor=val; 
-    else if (val=="green"||val=="red"||val=="orange"||val=="grey"||val=="black") document.getElementById(key).style.backgroundColor=val;
+    //else if (key=="Statecode" && (val=="green" ||val=="orange"||val=="grey"||val=="black")) document.getElementById("Statecode").style.backgroundColor=val; 
+    //else if (val=="green"||val=="red"||val=="orange"||val=="grey"||val=="black") document.getElementById(key).style.backgroundColor=val;
     else if (key=="Progress") d3.select('Progress').attr('value',val);  //document.getElementById(key).value=val;
     else if (key=="RawSdt") d3.select('RawSdt').html(val);
     else if (document.getElementById(key) != null) document.getElementById(key).innerHTML=val;

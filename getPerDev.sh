@@ -187,7 +187,7 @@ if(is.null(mac)) {
 	#mac=unique(a1[,5]);
 }
 
-headers=c("ID","DT","TAG","NumberofDaysDeviceConnected","MACAddr","DevName","OutputLabel","PoorSignalQuality","HighDelay","HighLoss","Congestion","SlowDevice","TotalHours","NonIdleHours","HoursWithSignificantTraffic","BadHours","HoursWithPoorSigQ","HoursWithHighDelay","HoursWithHighLoss","HoursWithCongestion","HoursWithSlowDevice","ListofDaysWithBadLink","ListofTimeofDayWithBadLink");
+headers=c("ID","DT","TAG","MODE","NumberofDaysDeviceConnected","MACAddr","DevName","OutputLabel","PoorSignalQuality","HighDelay","HighLoss","Congestion","SlowDevice","TotalHours","NonIdleHours","HoursWithSignificantTraffic","BadHours","HoursWithPoorSigQ","HoursWithHighDelay","HoursWithHighLoss","HoursWithCongestion","HoursWithSlowDevice","ListofDaysWithBadLink","ListofTimeofDayWithBadLink");
 write.table(headers,file=output_file,append=F,col.names=F,row.names=F,sep=",",eol=",");
 write.table("",file=output_file,append=T,col.names=F,row.names=F,sep=",",eol="\n" );
 
@@ -242,7 +242,7 @@ for(m in mac) {
 		#rS=getCounts(c,threshPkts,threshPktsLow,threshSI,threshBadSI,threshBadHI,threshWUFull,threshWUDiff,threshBadHourCount,threshBadHourFraction,threshBadHourFractionLow,debug-1);
 		rS=getCounts(c,threshPkts,threshPktsLow,threshSI,threshBadSI,threshBadHI,threshPoorSigQ,threshReasonFraction,threshBadHourCount,threshBadHourFraction,threshBadHourFractionLow,threshNumDays,debug-1);
 		#rS=m; # MAC address
-		rS_all=c(input_file,as.character(c[count,2]),'wifi',numDates,as.character(c[1,5]),as.character(c[1,6]),rS,rS_day,rS_hour);
+		rS_all=c(input_file,as.character(c[count,2]),'wifi',as.character(c[count,21]),numDates,as.character(c[1,5]),as.character(c[1,6]),rS,rS_day,rS_hour);
 		#rS_all=c(input_file,runDate,logDuration,numDates,m,as.character(c[1,6]),rS,rS_day,rS_hour);
 		#if(debug)
 		#{
