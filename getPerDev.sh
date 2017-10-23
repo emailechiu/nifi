@@ -242,7 +242,8 @@ for(m in mac) {
 		#rS=getCounts(c,threshPkts,threshPktsLow,threshSI,threshBadSI,threshBadHI,threshWUFull,threshWUDiff,threshBadHourCount,threshBadHourFraction,threshBadHourFractionLow,debug-1);
 		rS=getCounts(c,threshPkts,threshPktsLow,threshSI,threshBadSI,threshBadHI,threshPoorSigQ,threshReasonFraction,threshBadHourCount,threshBadHourFraction,threshBadHourFractionLow,threshNumDays,debug-1);
 		#rS=m; # MAC address
-		rS_all=c(input_file,as.character(c[count,2]),'wifi',as.character(c[count,21]),numDates,as.character(c[1,5]),as.character(c[1,6]),rS,rS_day,rS_hour);
+                b<-c[count,2]; b<-paste0(substr(b,7,10),'-',substr(b,1,2),'-',substr(b,4,5),substr(b,11,19))
+		rS_all=c(input_file,as.character(b),'wifi',as.character(c[count,21]),numDates,as.character(c[1,5]),as.character(c[1,6]),rS,rS_day,rS_hour);
 		#rS_all=c(input_file,runDate,logDuration,numDates,m,as.character(c[1,6]),rS,rS_day,rS_hour);
 		#if(debug)
 		#{

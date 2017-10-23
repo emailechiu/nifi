@@ -13,3 +13,4 @@ yum install texinfo-tex
 rpm -ivh http://mirror.unl.edu/epel/6/x86_64/epel-release-6-8.noarch.rpm
 yum install R-devel
 
+db.sdt.find({ID:"DSS10123043",TAG:{$nin:["0","TDD_STR","wifi"]}}).sort({DT:-1}).limit(10).pretty()

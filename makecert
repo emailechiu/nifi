@@ -1,0 +1,2 @@
+openssl s_client -connect tdsbeta.hnops.net:443 >tdsbeta.pem
+keytool -import -keystore tdsbeta.jks -file tdsbeta.pem
