@@ -1,12 +1,12 @@
 {
   "userId" : "cus360",
   "password" : "C2017360!",
-  "appName" : "test",
+  "appName" : null,
   "san" : "DSS10116332",
   "caseId" : "test",
-  "csrLoginId" : "test",
-  "object" : "test",
-  "sti" : "test",
+  "csrLoginId" : null,
+  "object" : null,
+  "sti" : null,
   "satelliteType" : "JUPITER1",
   "noSiteOrder" : true
 }

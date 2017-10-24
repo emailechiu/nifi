@@ -2,6 +2,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.4.11/d3.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
 <script src="app.js"></script>
+<script src="md5.min.js"></script>
 <style> 
 input::placeholder {color:black;}
 #SDT_JUDD:hover #SDT_JUDD_Hover {visibility:visible}
@@ -29,28 +30,30 @@ Current_Refresh,0,70,125,20,green,button
 DaysAgo,0,100,125,20,green,input
 History,0,130,125,20,green,button
 CustomerSC,125,20,125,50,green,input
-TroubleShoot,125,70,125,20,green,button
+ShowKB,125,70,125,20,green,button
 CallReason,125,100,125,20,green,button
 TOOLS,125,120,125,30,green,select
 MULTIVAL1,250,20,150,190,green,rect
 MULTIVAL2,400,20,190,190,green,button
-Last7days,590,20,90,100,green,rect
-IRCongestion,680,20,100,50,green,button
-ORCongestion,680,70,100,50,green,button
+Last7days,590,20,190,130,green,rect
+IRCongestion,590,150,145,30,green,button
+ORCongestion,735,150,145,30,green,button
 AccountStatus,780,20,100,65,green,rect
-Usage,590,170,70,30,green,rect
-Elapsed,750,220,100,30,green,rect
-VideoDataSaver,660,170,120,30,green,button
+Usage,590,180,70,30,green,rect
+Elapsed,780,220,100,30,green,rect
+VideoDataSaver,660,180,120,30,green,button
 FAP,780,85,100,65,green,rect
-Reboot,780,170,100,30,green,rect
-Progress,0,220,550,30,red,progress
-Progress_Sdtlinux,550,220,200,30,red,progress
+Reboot,780,180,100,30,green,rect
+Progress_Judd,0,220,450,30,red,progress
+Progress_Sdtlinux,460,220,100,30,red,progress
+Progress_Speedtest,570,220,100,30,red,progress
+Progress_Wifi,680,220,100,30,red,progress
 Email,0,270,150,80,green,rect
 Browsing,150,270,200,40,green,button
 Streaming,350,270,200,80,green,button
 UL,550,270,75,80,green,button
 DL,625,270,75,80,green,button
-VOIP,700,270,150,80,green,button
+VOIP,700,270,180,80,green,button
 Http,150,310,100,40,green,button
 Https,250,310,100,40,green,button
 InternetBB,0,450,100,50,green,button

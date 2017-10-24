@@ -1,10 +1,15 @@
 var san, myElapsed, count=0, data = [],message="";
-window.onload=init;
+window.onload=passwd;
+function passwd() {
+  var pass=prompt('enter your password',' ');
+  if (md5(pass)=='a2e87964baed8d6e04fd3238c21ae21a') init();
+  else alert('Access Denied');
+}
 
 function init() {
   var w = window.innerWidth;
   var h = window.innerHeight;
-
+  
   //var svg=d3.select('body').append('svg').attr('width',w).attr('height',h);
   var d = d3.csv.parse(d3.select("pre#layout").text()) //, function(error, d) {
   
@@ -87,10 +92,10 @@ function init() {
          $('#SiteID').val(san); 
          Current_Refresh();
       }
-  d3.select('#Current_Refresh').attr('onclick', "Current_Refresh()");$('#Current_Refresh').css('border-radius','30px');
+  d3.select('#Current_Refresh').attr('onclick', "Current_Refresh()");$('#Current_Refresh').css('border-radius','30px').css('border','none');
   d3.select('#History').attr('onclick', "History()");$('#History').css('border-radius','60px');
-  d3.select('#Statecode').attr('onclick',"window.open('Statecode.html#'+$('#Statecode').val(),'','resizable,height=400,width=1000');");
-  d3.select('#TroubleShoot').attr('onclick',"window.open('Statecode.html#'+$('#CustomerSC').val(),'','resizable,height=400,width=1000');");
+  d3.select('#Statecode').attr('onclick',"window.open('Statecode.html#'+$('#Statecode').val(),'','resizable,height=400,width=1000');");$('#ShowKB').css('border-radius','30px').css('border','none').css('outline','none');
+  d3.select('#ShowKB').attr('onclick',"window.open('Statecode.html#'+$('#CustomerSC').val(),'','resizable,height=400,width=1000');");
   //d3.select('#WifiLink').attr('onclick',"window.open('Statecode.html#'+$('#Statecode').html(),'Statecode Debug','resizable,height=200,width=400');");
   //d3.select('#WifiLink').attr('onclick',"var w=window.open('','','resizable,height=200,width=400');w.document.open().write('<h2>my table</h2>');");
   d3.select('#Devices_2G').attr('onclick',"WifiLink('/2G')");
@@ -129,6 +134,7 @@ function reinit(){
     d3.selectAll('rect').style('background-color','black');
     $("[id^=Devices]").each(function(){$(this).html('')})
     $("[id^=Devices]").each(function(){$(this).css('background-color', 'white')})
+    $("progress").each(function() {$(this).val(0)});
     count=0;
     if (myElapsed!=null) clearInterval(myElapsed);
     myElapsed=setInterval(Elapsed,1000);
@@ -138,7 +144,7 @@ function reinit(){
 function Elapsed() {
     count++;
     $('#Elapsed').html(count+' secs');
-    if ($('Progress').val()===1) clearInterval(myElapsed);
+    if (Array.from($("[id^=Progress]")).every(function(x) {return x.value===1})) clearInterval(myElapsed);
 }
 
 function SiteID(e) {
@@ -159,13 +165,13 @@ function Current_Refresh() {
   reinit();
   if ("WebSocket" in window) {
     //alert("WebSocket is supported by your Browser!");
-    var ws = new WebSocket("ws://gtdevnadlnxvm1:8888/");
+    var ws = new WebSocket("ws://gtdevnadlnxvm1.hughes.com:8888/");
     ws.onopen = function() {
       // Web Socket is connected, send data using send()
       san = document.getElementById('SiteID').value;
       console.log(san);
       ws.send(san);
-      $('#Progress').val(0.1);
+      $('#Progress_Judd').val(0.1);
       d3.select('#rawtable').html('<iframe id=lui src=http://'+san+'.terminal.jupiter.hnops.net style="height:800px;width:1000px;border:none;overflow:hidden;display:block" ></iframe>')
     };
 
