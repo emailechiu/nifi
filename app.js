@@ -128,6 +128,7 @@ function Statecode() {
 
 function reinit(){
     data=[];
+    $('*').stop(true,true);
     d3.selectAll('textarea').html("");
     d3.selectAll('div').html("");
     d3.selectAll('button').style('background-color','black');
@@ -201,6 +202,7 @@ function update(key,val) {
     console.log("setting",key,"to",val);
     try {
        if (val=="green" || val=="red" || val=="orange" ||val=="grey" || val=="black" || val=="yellow" ) document.getElementById(key).style.backgroundColor=val;
+       else if (val=="flash") $('#'+key).each(function setAnim() {$(this).animate({backgroundColor:'red'},500).animate({backgroundColor:'green'},500,setAnim);});
        //else if (key=="Statecode" && (val=="green" ||val=="orange"||val=="grey"||val=="black")) document.getElementById("Statecode").style.backgroundColor=val; 
        //else if (val=="green"||val=="red"||val=="orange"||val=="grey"||val=="black") document.getElementById(key).style.backgroundColor=val;
        else if (key.substr(0,8)=="Progress") document.getElementById(key).value=val;
