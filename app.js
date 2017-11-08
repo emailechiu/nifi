@@ -94,15 +94,29 @@ function init() {
       }
   d3.select('#Current_Refresh').attr('onclick', "Current_Refresh()");$('#Current_Refresh').css('border-radius','30px').css('border','none');
   d3.select('#History').attr('onclick', "History()");$('#History').css('border-radius','60px');
-  d3.select('#Statecode').attr('onclick',"window.open('Statecode.html#'+$('#Statecode').val(),'','resizable,height=400,width=1000');");$('#ShowKB').css('border-radius','30px').css('border','none').css('outline','none');
+  d3.select('#Statecode').attr('onclick',"window.open('Statecode.html#'+$('#Statecode').html(),'','resizable,height=400,width=1000');");$('#ShowKB').css('border-radius','30px').css('border','none').css('outline','none');
   d3.select('#ShowKB').attr('onclick',"window.open('Statecode.html#'+$('#CustomerSC').val(),'','resizable,height=400,width=1000');");
   //d3.select('#WifiLink').attr('onclick',"window.open('Statecode.html#'+$('#Statecode').html(),'Statecode Debug','resizable,height=200,width=400');");
   //d3.select('#WifiLink').attr('onclick',"var w=window.open('','','resizable,height=200,width=400');w.document.open().write('<h2>my table</h2>');");
+  d3.select('#Reboot').attr('onclick',"RebootTable()");
   d3.select('#Devices_2G').attr('onclick',"WifiLink('/2G')");
   d3.select('#Devices_5G').attr('onclick',"WifiLink('/5G')");
   d3.select('#Devices_Eth').attr('onclick',"WifiLink('/Eth')");
   d3.select('#rawtable').html('set browser proxy to http://qa.hughes.com/proxy.pac to see LUI when Tool->LUI is Submitted, also enable popup for topology and debug steps');
-  d3.select('#TOOLS').attr('onchange',"window[value]()").html('<option value="">TOOLS</option><option value="WAT">Web Access Test</option><option value="History">LUI</option><option value="RST">Reset IDU</option><option value="DIST">Deinstall</option><option value="FRR">Force range</option><option value="FAS">Force Associate</option><option value="FRE">Force Register</option>');
+  var options="<option value=''>TOOLS</option> \
+              <option value='lui'>LUI/WAT</option> \
+              <option value='force_range'>Force Range</option> \
+              <option value='clear_stats'>Clear Stats</option> \
+              <option value='reload_tables'>Reload Tables</option> \
+              <option value='force_fallback'>Force Fallback</option> \
+              <option value='reboot'>Reboot</option> \
+              <option value='re_associate'>Re-Associate</option> \
+              <option value='clear_pep_stats'>Clear PEP Stats</option> \
+              <option value='enable_wifi'>Enable WIFI</option> ";
+              
+  //d3.select('#TOOLS').attr('onchange',"window[value]()").html(options);
+  d3.select('#TOOLS').attr('onchange',"execute(value)").html(options);
+               
   //d3.select('#SDT_JUDD').attr('onmouseover', "SDT_JUDD()");
   //document.getElementById('History').innerHTML+='<span id=History_Hover>Tooltip</span>';
   //document.getElementById('SDT_JUDD').innerHTML+='<div id=SDT_JUDD_Hover>Tooltip</div>';
@@ -115,10 +129,14 @@ function SDT_JUDD() {
   
 }
 
-function History() {
-  san = document.getElementById('SiteID').value;
-  d3.select('#rawtable').html('<iframe id=lui src=http://'+san+'.terminal.jupiter.hnops.net onload="javascript:(function(o){o.style.height=o.contentWindow.document.body.scrollHeight});" style="height:800px;width:100%;border:none;overflow:hidden;" ></iframe>')
- 
+function execute(action) {
+  if (confirm(action+' is non-reversable, are you sure?'))
+  {
+    san = document.getElementById('SiteID').value;
+    process('{"ProgressSetsdt":0}');
+    if (action=='lui') d3.select('#rawtable').html('<iframe id=lui src=http://'+san+'.terminal.jupiter.hnops.net onload="javascript:(function(o){o.style.height=o.contentWindow.document.body.scrollHeight});" style="height:800px;width:100%;border:none;overflow:hidden;" ></iframe>')
+    else $.get('http://gtdevnadlnxvm1.hughes.com:8383?'+san+'='+action,function(result){process(result);alert(action+' completed');});
+  }
 }
 
 function Statecode() {
@@ -145,7 +163,7 @@ function reinit(){
 function Elapsed() {
     count++;
     $('#Elapsed').html(count+' secs');
-    if (Array.from($("[id^=Progress]")).every(function(x) {return x.value===1})) clearInterval(myElapsed);
+    if (Array.from($("[id^=Progress_]")).every(function(x) {return x.value===1})) clearInterval(myElapsed);
 }
 
 function SiteID(e) {
@@ -157,6 +175,13 @@ function SiteID(e) {
 
 function WifiLink(band) {
     $.get('http://qa.hughes.com:8000/wifi/history/'+$('#SiteID').val()+band,function(data) {
+      var w=window.open('','','height=400,width=1000');
+      w.document.open().write(data);
+      });
+}
+
+function RebootTable() {
+    $.get('http://qa.hughes.com:8000/sdtlinux/reboot/'+$('#SiteID').val(),function(data) {
       var w=window.open('','','height=400,width=1000');
       w.document.open().write(data);
       });
@@ -201,8 +226,9 @@ function color_fails(message) {
 function update(key,val) {
     console.log("setting",key,"to",val);
     try {
-       if (val=="green" || val=="red" || val=="orange" ||val=="grey" || val=="black" || val=="yellow" ) document.getElementById(key).style.backgroundColor=val;
-       else if (val=="flash") $('#'+key).each(function setAnim() {$(this).animate({backgroundColor:'red'},500).animate({backgroundColor:'green'},500,setAnim);});
+       if ( val=="green" || val=="limegreen"  || val=="red" || val=="orange" || val=="grey" || val=="black" || val=="yellow" ) document.getElementById(key).style.backgroundColor=val;
+       else if (val=="red & flashing") $('#'+key).each(function setAnim() {$(this).animate({backgroundColor:'red'},500).animate({backgroundColor:'green'},500,setAnim);});
+       else if (val=="limegreen & flashing") $('#'+key).each(function setAnim() {$(this).animate({backgroundColor:'limegreen'},500).animate({backgroundColor:'green'},500,setAnim);});
        //else if (key=="Statecode" && (val=="green" ||val=="orange"||val=="grey"||val=="black")) document.getElementById("Statecode").style.backgroundColor=val; 
        //else if (val=="green"||val=="red"||val=="orange"||val=="grey"||val=="black") document.getElementById(key).style.backgroundColor=val;
        else if (key.substr(0,8)=="Progress") document.getElementById(key).value=val;
