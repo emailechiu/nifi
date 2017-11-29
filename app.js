@@ -94,22 +94,24 @@ function init() {
       }
   d3.select('#Current_Refresh').attr('onclick', "Current_Refresh()");$('#Current_Refresh').css('border-radius','30px').css('border','none');
   d3.select('#History').attr('onclick', "History()");$('#History').css('border-radius','60px');
-  d3.select('#Statecode').attr('onclick',"window.open('Statecode.html#'+$('#Statecode').html(),'','resizable,height=400,width=1000');");$('#ShowKB').css('border-radius','30px').css('border','none').css('outline','none');
+  d3.select('#Statecode').attr('onclick',"window.open('http://gtdevnadlnxvm1.hughes.com/html_statecodes/statecodes/'+$('#Statecode').html()+'_statecode.html','','resizable,height=400,width=1000');");$('#ShowKB').css('border-radius','30px').css('border','none').css('outline','none');
   d3.select('#ShowKB').attr('onclick',"window.open('Statecode.html#'+$('#CustomerSC').val(),'','resizable,height=400,width=1000');");
   //d3.select('#WifiLink').attr('onclick',"window.open('Statecode.html#'+$('#Statecode').html(),'Statecode Debug','resizable,height=200,width=400');");
   //d3.select('#WifiLink').attr('onclick',"var w=window.open('','','resizable,height=200,width=400');w.document.open().write('<h2>my table</h2>');");
-  d3.select('#Reboot').attr('onclick',"RebootTable()");
+  d3.select('#RebootHistory').attr('onclick',"RebootTable()");
+  d3.select('#Usage').attr('onclick',"UsageTable()");
   d3.select('#Devices_2G').attr('onclick',"WifiLink('/2G')");
   d3.select('#Devices_5G').attr('onclick',"WifiLink('/5G')");
   d3.select('#Devices_Eth').attr('onclick',"WifiLink('/Eth')");
   d3.select('#rawtable').html('set browser proxy to http://qa.hughes.com/proxy.pac to see LUI when Tool->LUI is Submitted, also enable popup for topology and debug steps');
   var options="<option value=''>TOOLS</option> \
-              <option value='lui'>LUI/WAT</option> \
+              <option value='lui'>LUI/WAT(proxy 66.82.3.130)</option> \
               <option value='force_range'>Force Range</option> \
               <option value='clear_stats'>Clear Stats</option> \
               <option value='reload_tables'>Reload Tables</option> \
               <option value='force_fallback'>Force Fallback</option> \
               <option value='reboot'>Reboot</option> \
+              <option value='factory_reset'>Factory Reset(proxy 66.82.3.130)</option> \
               <option value='re_associate'>Re-Associate</option> \
               <option value='clear_pep_stats'>Clear PEP Stats</option> \
               <option value='enable_wifi'>Enable WIFI</option> ";
@@ -135,6 +137,8 @@ function execute(action) {
     san = document.getElementById('SiteID').value;
     process('{"ProgressSetsdt":0}');
     if (action=='lui') d3.select('#rawtable').html('<iframe id=lui src=http://'+san+'.terminal.jupiter.hnops.net onload="javascript:(function(o){o.style.height=o.contentWindow.document.body.scrollHeight});" style="height:800px;width:100%;border:none;overflow:hidden;" ></iframe>')
+    //else if (action=='wifi') $.get('http://'+san+'.terminal.jupiter.hnops.net/api/wifi/all_dev_info',function(result) {console.log(result);});
+    else if (action=='factory_reset') $.get('http://'+san+'.terminal.jupiter.hnops.net/api/wifi/run_cmd/?cmd=CMD_RESET_FACT_DEF',function(result) {alert(action+' completed');});
     else $.get('http://gtdevnadlnxvm1.hughes.com:8383?'+san+'='+action,function(result){process(result);alert(action+' completed');});
   }
 }
@@ -146,7 +150,7 @@ function Statecode() {
 
 function reinit(){
     data=[];
-    $('*').stop(true,true);
+    $('*').stop(true,false);
     d3.selectAll('textarea').html("");
     d3.selectAll('div').html("");
     d3.selectAll('button').style('background-color','black');
@@ -181,10 +185,14 @@ function WifiLink(band) {
 }
 
 function RebootTable() {
-    $.get('http://qa.hughes.com:8000/sdtlinux/reboot/'+$('#SiteID').val(),function(data) {
+    $.get('http://qa.hughes.com:8000/judd/reboot/'+$('#SiteID').val(),function(data) {
       var w=window.open('','','height=400,width=1000');
       w.document.open().write(data);
       });
+}
+
+function UsageTable() {
+      var w=window.open('http://qa.hughes.com:8000/whse/usage/'+$('#SiteID').val(),'','height=400,width=1000')
 }
 
 function Current_Refresh() {
@@ -227,8 +235,8 @@ function update(key,val) {
     console.log("setting",key,"to",val);
     try {
        if ( val=="green" || val=="limegreen"  || val=="red" || val=="orange" || val=="grey" || val=="black" || val=="yellow" ) document.getElementById(key).style.backgroundColor=val;
-       else if (val=="red & flashing") $('#'+key).each(function setAnim() {$(this).animate({backgroundColor:'red'},500).animate({backgroundColor:'green'},500,setAnim);});
-       else if (val=="limegreen & flashing") $('#'+key).each(function setAnim() {$(this).animate({backgroundColor:'limegreen'},500).animate({backgroundColor:'green'},500,setAnim);});
+       else if (val=="red & flashing") $('#'+key).each(function setAnim() {$(this).animate({backgroundColor:'red'},750).animate({backgroundColor:'green'},750,setAnim);});
+       else if (val=="limegreen & flashing") $('#'+key).each(function setAnim() {$(this).animate({backgroundColor:'limegreen'},750).animate({backgroundColor:'green'},750,setAnim);});
        //else if (key=="Statecode" && (val=="green" ||val=="orange"||val=="grey"||val=="black")) document.getElementById("Statecode").style.backgroundColor=val; 
        //else if (val=="green"||val=="red"||val=="orange"||val=="grey"||val=="black") document.getElementById(key).style.backgroundColor=val;
        else if (key.substr(0,8)=="Progress") document.getElementById(key).value=val;
