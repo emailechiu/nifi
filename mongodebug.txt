@@ -1,0 +1,146 @@
+/etc/security/limits.d/90-nproc.conf
+/shiny@qa:~$ pm2 ls
+┌──────────┬────┬──────┬───────┬─────────┬─────────┬────────┬─────┬───────────┬───────┬──────────┐
+│ App name │ id │ mode │ pid   │ status  │ restart │ uptime │ cpu │ mem       │ user  │ watching │
+├──────────┼────┼──────┼───────┼─────────┼─────────┼────────┼─────┼───────────┼───────┼──────────┤
+│ customer │ 0  │ fork │ 13333 │ online  │ 455     │ 2m     │ 0%  │ 82.8 MB   │ shiny │ disabled │
+
+Watch the mem value, see where it is when your R applicationstops responding, or the tail -f shows memory problems.
+
+pm2 monit
+
+tail -f  /home/shiny/.pm2/logs/customer-out-0.log
+
+For mongo db problem,  on gtdevnadlnxvm1
+tail -f /var/log/mongodb/mongo.log, observe that number of connections gets to 1023 and error out
+
+open mongo shell : mongo
+then db.serverStatus().connections
+{ "current" : 90, "available" : 52338, "totalCreated" : 90 }
+
+-bash-4.1$ ps -elf |grep mongo
+1 S mongod   29606     1  0  80   0 - 260015 futex_ Nov30 ?       00:00:09 /usr/        bin/mongod -f /etc/mongod.conf
+0 S echiu    30244 28841  0  80   0 - 25832 pipe_w 00:29 pts/4    00:00:00 grep         mongo
+-bash-4.1$ sudo more /proc/29606/limits
+[sudo] password for echiu:
+Limit                     Soft Limit           Hard Limit           Units
+Max cpu time              unlimited            unlimited            seconds
+Max file size             unlimited            unlimited            bytes
+Max data size             unlimited            unlimited            bytes
+Max stack size            10485760             unlimited            bytes
+Max core file size        0                    unlimited            bytes
+Max resident set          unlimited            unlimited            bytes
+Max processes             1024                 64000                processes
+
+
+
+/etc/init.d/mongod
+  ulimit -f unlimited
+  ulimit -t unlimited
+  ulimit -v unlimited
+  ulimit -n 64000
+  ulimit -m unlimited
+  ulimit -u 64000
+
+WireTiger recommend use XFS for performance
+Adjust the ulimit values on your hardware to suit your use case. If multiple mongod or mongos instances are running under the same user, scale the ulimit values accordingly. See: UNIX ulimit Settings for more information.
+Use noatime for the dbPath mount point.
+Configure sufficient file handles (fs.file-max), kernel pid limit (kernel.pid_max), and maximum threads per process (kernel.threads-max) for your deployment. For large systems, the following values provide a good starting point:
+fs.file-max value of 98000,
+kernel.pid_max value of 64000, and
+kernel.threads-max value of 64000
+Ensure that your system has swap space configured. Refer to your operating system’s documentation for details on appropriate sizing.
+Ensure that the system default TCP keepalive is set correctly. A value of 300 often provides better performance for replica sets and sharded clusters. See: Does TCP keepalive time affect MongoDB Deployments? in the Frequently Asked Questions for more information.
+
+fork    = true
+port    = 27017
+maxConns = 10000
+ulimit -n 25000
+mongod ulimit -n 10000 --maxConns 50000 --config mongod1.conf 
+/etc/security/limits.conf nofiles=65536, noproc=1000
+/proc/sys/fs/file-max : 65536
+/etc/sysctl.conf : fs.file-max=50000
+
+-bash-4.1$ sudo more /proc/28480/limits
+Limit                     Soft Limit           Hard Limit           Units
+Max cpu time              unlimited            unlimited            seconds
+Max file size             unlimited            unlimited            bytes
+Max data size             unlimited            unlimited            bytes
+Max stack size            10485760             unlimited            bytes
+Max core file size        0                    unlimited            bytes
+Max resident set          unlimited            unlimited            bytes
+Max processes             1024                 64000                processes
+Max open files            65536                65536                files
+Max locked memory         65536                65536                bytes
+Max address space         unlimited            unlimited            bytes
+Max file locks            unlimited            unlimited            locks
+Max pending signals       256704               256704               signals
+Max msgqueue size         819200               819200               bytes
+Max nice priority         0                    0
+Max realtime priority     0                    0
+Max realtime timeout      unlimited            unlimited            us
+
+
+> db.serverStatus().connections
+{ "current" : 90, "available" : 52338, "totalCreated" : 90 }
+
+-bash-4.1$ ulimit -a
+core file size          (blocks, -c) 0
+data seg size           (kbytes, -d) unlimited
+scheduling priority             (-e) 0
+file size               (blocks, -f) unlimited
+pending signals                 (-i) 256704
+max locked memory       (kbytes, -l) 64
+max memory size         (kbytes, -m) unlimited
+open files                      (-n) 65536
+pipe size            (512 bytes, -p) 8
+POSIX message queues     (bytes, -q) 819200
+real-time priority              (-r) 0
+stack size              (kbytes, -s) 10240
+cpu time               (seconds, -t) unlimited
+max user processes              (-u) 2048
+virtual memory          (kbytes, -v) unlimited
+file locks                      (-x) unlimited
+
+# mongod.conf
+
+# for documentation of all options, see:
+#   http://docs.mongodb.org/manual/reference/configuration-options/
+
+# where to write logging data.
+systemLog:
+  destination: file
+  logAppend: true
+  path: /var/log/mongodb/mongod.log
+
+# Where and how to store data.
+storage:
+  dbPath: /disk3/mongo
+  journal:
+    enabled: true
+#  engine:
+#  mmapv1:
+#  wiredTiger:
+
+# how the process runs
+processManagement:
+  fork: true  # fork and run in background
+  pidFilePath: /var/log/mongodb/mongod.pid  # location of pidfile
+
+# network interfaces
+net:
+  port: 27017
+  http:
+    enabled: true
+    RESTInterfaceEnabled: true
+# bindIp: 127.0.0.1  # Listen to local interface only, comment to listen on all interfaces.
+
+#security:
+
+#operationProfiling:
+
+#replication:
+
+#sharding:
+
+## Enterprise-Only Options

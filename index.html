@@ -2,9 +2,16 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.4.11/d3.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
 <script src="http://code.jquery.com/ui/1.10.0/jquery-ui.js"></script>
+<link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-2.4.1.css">
+<script src="https://code.jquery.com/qunit/qunit-2.4.1.js"></script>
 <script src="app.js"></script>
 <script src="md5.min.js"></script>
 <style> 
+progress:before {
+  content: attr(data-label);
+  position:relative;
+  top:5px;
+}
 input::placeholder {color:black;}
 #SDT_JUDD:hover #SDT_JUDD_Hover {visibility:visible}
 #SDT_JUDD_Hover {display: block; visibility:hidden; top: 0px; left: 0px; position: relative; width: 400px; height: 400px; background-color: black;z-index:1;}
@@ -24,6 +31,8 @@ textarea {  resize: none;
 </style>
 </head>
 <body>
+<div id=qunit style='position:absolute;left:1000px;top:10px;width:2000px;height:2000px;background-color:yellow;display:none'></div>
+<div id=quest style='position:absolute;left:10px;top:10px;width:2000px;height:2000px;'></div>
 <pre id='layout' style="display:none" >
 text,x,y,width,height,color,type
 SiteID,0,20,125,50,green,input
@@ -42,13 +51,13 @@ IRCongestion,590,150,145,30,green,button
 ORCongestion,735,150,145,30,green,button
 AccountStatus,780,20,100,65,green,rect
 Usage,590,180,70,30,green,button
-Elapsed,780,220,100,30,green,rect
 RebootHistory,660,180,220,30,green,button
 FAP,780,85,100,65,green,rect
-Progress_Judd,0,220,340,30,red,progress
-Progress_Sdtlinux,350,220,210,30,red,progress
-Progress_Speedtest,570,220,100,30,red,progress
-Progress_Wifi,680,220,100,30,red,progress
+Progress_Judd,0,220,200,30,red,progress
+Progress_Sdtlinux,200,220,200,30,red,progress
+Progress_Speedtest,400,220,190,30,red,progress
+Progress_Wifi,590,220,190,30,red,progress
+Elapsed,780,220,100,30,green,rect
 Email,0,270,150,80,green,rect
 Browsing,150,270,200,40,green,button
 Streaming,350,270,200,80,green,button
@@ -73,7 +82,7 @@ CRO,240,450,150,20,green,vbutton
 IGM,260,450,150,20,green,vbutton
 PowerSupply,615,450,100,20,green,vbutton
 Statecode,535,370,100,40,green,button
-SAT_Modem,535,410,100,40,green,button
+VSAT,535,410,100,40,green,button
 ANT,535,450,150,20,green,vbutton
 ODU,555,450,150,20,green,vbutton
 IFL,575,450,150,20,green,vbutton

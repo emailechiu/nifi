@@ -1,19 +1,43 @@
-var san, myElapsed, count=0, data = [],message="";
-window.onload=passwd;
+var san, myElapsed, myTest, count=0, data = [],message="",TEST=false, TESTTIMEOUT=90;
+window.onload=init;
+function test() {
+  QUnit.test( "Judd Progress", function( assert ) { assert.ok( $('#Progress_Judd').val()===1 , "Passed!"); });
+  QUnit.test( "Sdtlinux Progress", function( assert ) { assert.ok( $('#Progress_Sdtlinux').val()===1 , "Passed!"); });
+  QUnit.test( "SpeedTest Progress", function( assert ) { assert.ok( $('#Progress_Speedtest').val()===1 , "Passed!"); });
+  QUnit.test( "Wifi Progress", function( assert ) { assert.ok( $('#Progress_Wifi').val()===1 , "Passed!"); });
+  QUnit.test( "MULTIVAL1 color", function( assert ) { assert.ok( $('#MULTIVAL1').css('backgroundColor')==="rgb(0, 128, 0)" , "Passed!"); });
+  QUnit.test( "MULTIVAL2 color", function( assert ) { assert.ok( $('#MULTIVAL2').css('backgroundColor')==="rgb(0, 128, 0)" , "Passed!"); });
+  QUnit.test( "MULTIVAL3 color", function( assert ) { assert.ok( $('#MULTIVAL3').css('backgroundColor')==="rgb(0, 128, 0)" , "Passed!"); });
+  QUnit.test( "AccountStatus color", function( assert ) { assert.ok( $.inArray($('#AccountStatus').css('backgroundColor'),["rgb(0, 128, 0)","rgb(255, 0, 0)"])>=0 , "Passed!"); });
+  QUnit.test( "FAP color", function( assert ) { assert.ok( $.inArray($('#FAP').css('backgroundColor'),["rgb(0, 128, 0)","rgb(255, 0, 0)"])>=0 , "Passed!"); });
+  QUnit.test( "IRCongestion color", function( assert ) { assert.ok( $.inArray($('#IRCongestion').css('backgroundColor'),  ["rgb(0, 128, 0)","rgb(255, 0, 0)"])>=0 , "Passed!"); });
+  QUnit.test( "ORCongestion color", function( assert ) { assert.ok( $.inArray($('#ORCongestion').css('backgroundColor'),["rgb(0, 128, 0)","rgb(255, 0, 0)"])>=0 , "Passed!"); });
+  QUnit.test( "Usage color", function( assert ) { assert.ok( $.inArray($('#Usage').css('backgroundColor'),["rgb(0, 128, 0)","rgb(255, 0, 0)"])>=0 , "Passed!"); });
+  QUnit.test( "RebootHistory color", function( assert ) { assert.ok( $.inArray($('#RebootHistory').css('backgroundColor'),["rgb(0, 128, 0)","rgb(255, 0, 0)"])>=0 , "Passed!"); });
+  QUnit.test( "UL color", function( assert ) { assert.ok( $.inArray($('#UL').css('backgroundColor'),["rgb(0, 128, 0)","rgb(255, 0, 0)"])>=0 , "Passed!"); });
+  QUnit.test( "DL color", function( assert ) { assert.ok( $.inArray($('#DL').css('backgroundColor'),["rgb(0, 128, 0)","rgb(255, 0, 0)"])>=0 , "Passed!"); });
+  QUnit.test( "GWAirLink color", function( assert ) { assert.ok( $.inArray($('#GwAirLink').css('backgroundColor'),["rgb(0, 128, 0)","rgb(255, 0, 0)"])>=0 , "Passed!"); });
+  QUnit.test( "SiteAirLink color", function( assert ) { assert.ok( $.inArray($('#SiteAirLink').css('backgroundColor'),["rgb(0, 128, 0)","rgb(255, 0, 0)"])>=0 , "Passed!"); });
+}
+
 function passwd() {
   var pass=prompt('enter your password',' ');
   if (md5(pass)=='a2e87964baed8d6e04fd3238c21ae21a') init();
   else alert('Access Denied');
 }
-
+function q() { 
+  $('#qunit').toggle();
+  $('#rawtable').toggle(); 
+  $('#RawSdt').toggle(); 
+  $('#RawWifi').toggle(); 
+}
 function init() {
   var w = window.innerWidth;
   var h = window.innerHeight;
-  
+ 
   //var svg=d3.select('body').append('svg').attr('width',w).attr('height',h);
   var d = d3.csv.parse(d3.select("pre#layout").text()) //, function(error, d) {
-  
-  d3.selectAll('button').data(d.filter(function(d) {
+  d3.select("#quest").selectAll('button').data(d.filter(function(d) {
     return d.type == 'button' || d.type == 'rect' || d.type == 'vbutton'
   })).enter().append('button').attr('id', function(d) {
     return d.text
@@ -32,7 +56,7 @@ function init() {
     return "";
   });
 
-  d3.selectAll('input').data(d.filter(function(d) {
+  d3.select("#quest").selectAll('input').data(d.filter(function(d) {
     return d.type == 'input'
   })).enter().append('input').attr('id', function(d) {
     return d.text
@@ -44,7 +68,7 @@ function init() {
     return "Enter ".concat(d.text)
   });//.attr('disabled',function(d) {if (d.type=='button') return; else return "";});
   
-  d3.selectAll('select').data(d.filter(function(d) {
+  d3.select("#quest").selectAll('select').data(d.filter(function(d) {
     return d.type == 'select'
   })).enter().append('select').attr('id', function(d) {
     return d.text
@@ -56,7 +80,7 @@ function init() {
    
   
   
-  d3.selectAll('textarea').data(d.filter(function(d) { //this is not used
+  d3.select("#quest").selectAll('textarea').data(d.filter(function(d) { //this is not used
     return d.type == 'textarea'
   })).enter().append('textarea').attr('id', function(d) {
     return d.text
@@ -66,7 +90,7 @@ function init() {
     return d.color
   }).html(function(d) {return d.text});//.attr('disabled',function(d) {if (d.type=='button') return; else return "";});
   
-  d3.selectAll('div').data(d.filter(function(d) {
+  d3.select("#quest").selectAll('div').data(d.filter(function(d) {
     return d.type == 'div' 
   })).enter().append('div').attr('id', function(d) {
     return d.text
@@ -78,17 +102,19 @@ function init() {
     return d.text
   });//.attr('display',function(d) {if (d.type == 'divh') return 'none'; else return 'block';});
   
-  d3.selectAll('progress').data(d.filter(function(d) {
+  d3.select("#quest").selectAll('progress').data(d.filter(function(d) {
     return d.type=='progress'
   })).enter().append('progress').attr('style', function(d) {
-    return 'top:'.concat(d.y).concat('px;left:').concat(d.x).concat('px;position:absolute;width:').concat(d.width).concat('px;height:').concat(d.height).concat('px;')
+    return 'top:'.concat(d.y).concat('px;left:').concat(d.x).concat('px;position:absolute;text-align:center; width:').concat(d.width).concat('px;height:').concat(d.height).concat('px;')
   }).style('color', function(d) {
     return d.color
   }).attr('id', function(d) {
     return d.text
-  }).attr('value',0);
+  }).attr('value',0).attr('data-label',function(d) {
+    return d.text
+  });
   var san = window.location.pathname.substr(1);
-  if (san!='') { // send query straight to websocket 
+  if (san!='' && !san.includes('.')) { // send query straight to websocket 
          $('#SiteID').val(san); 
          Current_Refresh();
       }
@@ -111,7 +137,7 @@ function init() {
               <option value='reload_tables'>Reload Tables</option> \
               <option value='force_fallback'>Force Fallback</option> \
               <option value='reboot'>Reboot</option> \
-              <option value='factory_reset'>Factory Reset(proxy 66.82.3.130)</option> \
+              <option value='factory_reset'>Factory Reset wifi(proxy 66.82.3.130)</option> \
               <option value='re_associate'>Re-Associate</option> \
               <option value='clear_pep_stats'>Clear PEP Stats</option> \
               <option value='enable_wifi'>Enable WIFI</option> ";
@@ -152,7 +178,7 @@ function reinit(){
     data=[];
     $('*').stop(true,false);
     d3.selectAll('textarea').html("");
-    d3.selectAll('div').html("");
+    $("div:not([id^='qu'])").html("");
     d3.selectAll('button').style('background-color','black');
     d3.selectAll('rect').style('background-color','black');
     $("[id^=Devices]").each(function(){$(this).html('')})
@@ -166,8 +192,8 @@ function reinit(){
 
 function Elapsed() {
     count++;
-    $('#Elapsed').html(count+' secs');
-    if (Array.from($("[id^=Progress_]")).every(function(x) {return x.value===1})) clearInterval(myElapsed);
+    $('#Elapsed').html(count);
+    if (Array.from($("[id^=Progress_]")).every(function(x) {return x.value===1})) { clearInterval(myElapsed); if ( TEST && $('#Elapsed').html()<TESTTIMEOUT) {clearTimeout(myTest); setTimeout(function() {q();test();},5000);} } 
 }
 
 function SiteID(e) {
@@ -200,6 +226,7 @@ function Current_Refresh() {
   if ("WebSocket" in window) {
     //alert("WebSocket is supported by your Browser!");
     var ws = new WebSocket("ws://gtdevnadlnxvm1.hughes.com:8888/");
+    if (TEST) myTest = setTimeout(function() {q();test();}, TESTTIMEOUT*1000);
     ws.onopen = function() {
       // Web Socket is connected, send data using send()
       san = document.getElementById('SiteID').value;
@@ -232,9 +259,10 @@ function color_fails(message) {
 }
 
 function update(key,val) {
-    console.log("setting",key,"to",val);
+    console.log("setting",key,"to",val, "as type", typeof(val));
     try {
-       if ( val=="green" || val=="limegreen"  || val=="red" || val=="orange" || val=="grey" || val=="black" || val=="yellow" ) document.getElementById(key).style.backgroundColor=val;
+       if (typeof(val)=='string' && val.includes('flashing')) $('#'+key).attr('onclick',"window.open('http://gtdevnadlnxvm1.hughes.com/html_statecodes/statecodes/'+$('#Statecode').html()+'_statecode.html','','resizable,height=400,width=1000');");
+       if ( val=="green" || val=="limegreen"  || val=="red" ||  val=="grey" || val=="black" ) document.getElementById(key).style.backgroundColor=val;
        else if (val=="red & flashing") $('#'+key).each(function setAnim() {$(this).animate({backgroundColor:'red'},750).animate({backgroundColor:'green'},750,setAnim);});
        else if (val=="limegreen & flashing") $('#'+key).each(function setAnim() {$(this).animate({backgroundColor:'limegreen'},750).animate({backgroundColor:'green'},750,setAnim);});
        //else if (key=="Statecode" && (val=="green" ||val=="orange"||val=="grey"||val=="black")) document.getElementById("Statecode").style.backgroundColor=val; 
