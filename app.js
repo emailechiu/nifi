@@ -1,4 +1,4 @@
-var san, myElapsed, myTest, count=0, data = [],message="",TEST=false, TESTTIMEOUT=90;
+var kbaKey, san, myElapsed, myTest, count=0, data = [],message="",TEST=false, TESTTIMEOUT=90;
 window.onload=init;
 function test() {
   QUnit.test( "Judd Progress", function( assert ) { assert.ok( $('#Progress_Judd').val()===1 , "Passed!"); });
@@ -44,6 +44,8 @@ function init() {
   }).attr('type', 'submit').attr('style', function(d) {
     return 'top:'.concat(d.y).concat('px;left:').concat(d.x).concat('px;color:white;position:absolute;width:').concat(d.width).concat('px;height:').concat(d.height).concat('px;background-color:').concat(d.color)
   }).html(function(d) {
+    return d.text
+  }).attr('default',function(d) {
     return d.text
   }).attr('disabled', function(d) {
     if (d.type == 'button' | d.type == 'vbutton') return;
@@ -176,6 +178,8 @@ function Statecode() {
 
 function reinit(){
     data=[];
+    //$('button').each(function() {if ($(this).prop('disabled')) $(this).html($(this).attr('default'))})
+    $('button').each(function() {$(this).html($(this).attr('default'))})
     $('*').stop(true,false);
     d3.selectAll('textarea').html("");
     $("div:not([id^='qu'])").html("");
@@ -261,15 +265,22 @@ function color_fails(message) {
 function update(key,val) {
     console.log("setting",key,"to",val, "as type", typeof(val));
     try {
-       if (typeof(val)=='string' && val.includes('flashing')) $('#'+key).attr('onclick',"window.open('http://gtdevnadlnxvm1.hughes.com/html_statecodes/statecodes/'+$('#Statecode').html()+'_statecode.html','','resizable,height=400,width=1000');");
-       if ( val=="green" || val=="limegreen"  || val=="red" ||  val=="grey" || val=="black" ) document.getElementById(key).style.backgroundColor=val;
+       if (typeof(val)=='string' && val.includes('flashing'))  $('#'+key).attr('onclick',"window.open('http://gtdevnadlnxvm1.hughes.com/html_statecodes/statecodes/'+ kbaKey +'_statecode.html','','resizable,height=400,width=1000');");
+       if ( val=="green" || val=="limegreen"  || val=="red" ||  val=="grey" || val=="black" ) {
+            document.getElementById(key).style.backgroundColor=val;
+            if (val=='red' && (key=='UL' || key=='DL' || key.includes('AirLink') )) $('#'+key).attr('onclick',"window.open('http://gtdevnadlnxvm1.hughes.com/ULDL.html','','resizable,height=100,width=1000');");
+         }
        else if (val=="red & flashing") $('#'+key).each(function setAnim() {$(this).animate({backgroundColor:'red'},750).animate({backgroundColor:'green'},750,setAnim);});
        else if (val=="limegreen & flashing") $('#'+key).each(function setAnim() {$(this).animate({backgroundColor:'limegreen'},750).animate({backgroundColor:'green'},750,setAnim);});
        //else if (key=="Statecode" && (val=="green" ||val=="orange"||val=="grey"||val=="black")) document.getElementById("Statecode").style.backgroundColor=val; 
        //else if (val=="green"||val=="red"||val=="orange"||val=="grey"||val=="black") document.getElementById(key).style.backgroundColor=val;
        else if (key.substr(0,8)=="Progress") document.getElementById(key).value=val;
        else if (key=="RawSdt") d3.select('RawSdt').html(val);
-       else if (document.getElementById(key) != null) document.getElementById(key).innerHTML=val;
+       else if (document.getElementById(key) != null) {
+            document.getElementById(key).innerHTML=val;
+            if ((key=='Statecode' || key=='VSAT') & document.getElementById(key).style.backgroundColor=='red') {kbaKey=val; $('#'+key).attr('onclick',"window.open('http://gtdevnadlnxvm1.hughes.com/html_statecodes/statecodes/'+ kbaKey +'_statecode.html','','resizable,height=400,width=1000');");} //only clickable when red
+
+        }
     }
    catch (e) {}
 }
