@@ -139,7 +139,7 @@ function init() {
   d3.select('#Devices_Eth').attr('onclick',"WifiLink('/Eth')");
   d3.select('#rawtable').html('set browser proxy to http://qa.hughes.com/proxy.pac to see LUI when Tool->LUI is Submitted, also enable popup for topology and debug steps');
   $('#RecommendSteps').attr('style',$('#RecommendSteps').attr('style')+';overflow:auto');
-  var options="<option value=''>TOOLS</option> \
+  var options="<option value='' disabled selected style='display:none'>TOOLS</option> \
               <option value='Sdtlinux'>Rerun Sdtlinux</option> \
               <option value='JuddSpeedtest'>Rerun Judd SpeedTest</option> \
               <option value='Wifi'>Rerun Wifi</option> \
@@ -179,7 +179,7 @@ function reboot_wrapup(){
 
 function execute(action) {
   if (['Sdtlinux','JuddSpeedtest','Wifi','SiteInfo'].includes(action)) Current_Refresh(action);
-  else if (confirm(action+' is non-reversable, are you sure?'))
+  else if (action!='' && confirm(action+' is non-reversable, are you sure?'))
   {
     san = document.getElementById('SiteID').value;
     statecode = document.getElementById('Statecode').value;
@@ -189,12 +189,12 @@ function execute(action) {
     if (action=='factory_reset') $.get('http://'+san+'.terminal.jupiter.hnops.net/api/wifi/run_cmd/?cmd=_CMD_RESET_FACT_DEF',function(result) {alert(action+' completed');});
     else if (action=='disable_wifi') $.get('http://'+san+'.terminal.jupiter.hnops.net/api/wifi/off',function(result) {alert(action+' completed');});
     else if (action=='enable_wifi') $.get('http://'+san+'.terminal.jupiter.hnops.net/api/wifi/on',function(result) {alert(action+' completed');});
-    else if (action=='enable_wifi') $.get('http://'+san+'.terminal.jupiter.hnops.net/api/wifi/on',function(result) {alert(action+' completed');});
     else { $.get('http://gtdevnadlnxvm1.hughes.com:8383?'+san+'='+action,function(result){process(result);alert(action+' completed');});
            setTimeout(function() {reboot_wrapup();},120000); 
            reinit();}
    
   }
+ document.getElementById('TOOLS').selectedIndex=0; 
 }
 function clickify(content) {
   content=content.replace('Force Range','<button onclick=execute("force_range")>Force Range</button>')
@@ -275,6 +275,8 @@ function reinit(){
     $("[id^=Devices]").each(function(){$(this).html('')})
     $("[id^=Devices]").each(function(){$(this).css('background-color', 'white')})
     $("progress").each(function() {$(this).val(0)});
+    var san = document.getElementById('SiteID').value.toUpperCase();
+    d3.select('#rawtable').html('<iframe id=lui src=http://'+san+'.terminal.jupiter.hnops.net style="height:800px;width:1000px;border:none;overflow:hidden;display:block" ></iframe>')
     restartTimer();
     //$("[id^=Device]").each(function(){$(this).html($(this).prop('id'))})
 }
@@ -340,7 +342,6 @@ function Current_Refresh(ep='') {
               console.log($(this)); 
               if (ep.includes($(this).attr('id').substring(10))) $(this).val(0)});
       //$('#Progress_Judd').val(0.1);
-      d3.select('#rawtable').html('<iframe id=lui src=http://'+san+'.terminal.jupiter.hnops.net style="height:800px;width:1000px;border:none;overflow:hidden;display:block" ></iframe>')
       // d3.select('#Device14DayHistory').html('<iframe id=lui src=http://qa.hughes.com:3838/diagnostics style="height:800px;width:1000px;border:none;overflow:hidden;display:block" ></iframe>')
     };
 
