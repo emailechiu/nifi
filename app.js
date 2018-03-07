@@ -1,4 +1,4 @@
-var kbaKey, san, myElapsed, myTest, count=0, data = [],message="",TEST=false, TESTTIMEOUT=90;
+var VSAT_KBAKEY, STCD_KBAKEY, san, myElapsed, myTest, count=0, data = [],message="",TEST=false, TIER=3, TESTTIMEOUT=90;
 window.onload=init;
 function test() {
   QUnit.test( "Judd Progress", function( assert ) { assert.ok( $('#Progress_Judd').val()===1 , "Passed!"); });
@@ -28,7 +28,7 @@ function passwd() {
 function q() { 
   $('#qunit').toggle();
   $('#rawtable').toggle(); 
-  $('#RawSdt').toggle(); 
+  //$('#RawSdt').toggle(); 
   $('#RecommendSteps').toggle(); 
 }
 function init() {
@@ -36,7 +36,7 @@ function init() {
   var h = window.innerHeight;
  
   //var svg=d3.select('body').append('svg').attr('width',w).attr('height',h);
-  var d = d3.csv.parse(d3.select("pre#layout").text()) //, function(error, d) {
+  var d = d3.csv.parse(d3.select("pre#layout").text()).filter(data=>data.tier<=TIER); //, function(error, d) {
   d3.select("#quest").selectAll('button').data(d.filter(function(d) {
     return d.type == 'button' || d.type == 'rect' || d.type == 'vbutton'
   })).enter().append('button').attr('id', function(d) {
@@ -103,7 +103,7 @@ function init() {
   }).html(function(d) {
     return d.text
   });//.attr('display',function(d) {if (d.type == 'divh') return 'none'; else return 'block';});
-  
+ 
   d3.select("#quest").selectAll('progress').data(d.filter(function(d) {
     return d.type=='progress'
   })).enter().append('progress').attr('style', function(d) {
@@ -124,8 +124,9 @@ function init() {
   d3.select('#History').attr('onclick', "History()");$('#History').css('border-radius','60px');
   d3.select('#Statecode').attr('onclick',"Statecode_KBA()");
   d3.select('#VSAT').attr('onclick',"VSAT_KBA()");
+  d3.select('#Device14Days').attr('onclick',"$.get('http://qa.hughes.com:8000/wifi/dev14day/'+$('#SiteID').val(), function(data) { $('#Device14DayHistory').html(data); });");
   //d3.select('#ShowKB').attr('onclick',"window.open('http://gtdevnadlnxvm1.hughes.com/html_statecodes/statecodes/'+$('#CustomerSC').val()+'_statecode.html','','resizable,height=400,width=1000');");
-  d3.select('#ShowKB').attr('onclick',"Statecode_KBA($('#CustomerSC').val())");
+  d3.select('#ShowKB').attr('onclick',"ShowKB_KBA()");
   $('#ShowKB').css('border-radius','30px').css('border','none').css('outline','none');
   //d3.select('#ShowKB').attr('onclick',"window.open('Statecode.html#'+$('#CustomerSC').val(),'','resizable,height=400,width=1000');");
   //d3.select('#WifiLink').attr('onclick',"window.open('Statecode.html#'+$('#Statecode').html(),'Statecode Debug','resizable,height=200,width=400');");
@@ -137,7 +138,12 @@ function init() {
   d3.select('#Devices_5G').attr('onclick',"WifiLink('/5G')");
   d3.select('#Devices_Eth').attr('onclick',"WifiLink('/Eth')");
   d3.select('#rawtable').html('set browser proxy to http://qa.hughes.com/proxy.pac to see LUI when Tool->LUI is Submitted, also enable popup for topology and debug steps');
+  $('#RecommendSteps').attr('style',$('#RecommendSteps').attr('style')+';overflow:auto');
   var options="<option value=''>TOOLS</option> \
+              <option value='Sdtlinux'>Rerun Sdtlinux</option> \
+              <option value='JuddSpeedtest'>Rerun Judd SpeedTest</option> \
+              <option value='Wifi'>Rerun Wifi</option> \
+              <option value='SiteInfo'>Subscriptions Plan</option> \
               <option value='lui'>LUI/WAT(proxy 66.82.3.130)</option> \
               <option value='force_range'>Force Range</option> \
               <option value='clear_stats'>Clear Stats</option> \
@@ -165,19 +171,29 @@ function SDT_JUDD() {
   
 }
 
+function reboot_wrapup(){
+    d3.select('#rawtable').html('<iframe id=lui src=http://'+san+'.terminal.jupiter.hnops.net onload="javascript:(function(o){o.style.height=o.contentWindow.document.body.scrollHeight});" style="height:800px;width:100%;border:none;overflow:hidden;" ></iframe>')
+    Current_Refresh('Sdtlinux,JuddSpeedtest,14Days,SiteInfo');
+    setTimeout(function() {Current_Refresh('Wifi');}, 60000); 
+}
+
 function execute(action) {
-  if (confirm(action+' is non-reversable, are you sure?'))
+  if (['Sdtlinux','JuddSpeedtest','Wifi','SiteInfo'].includes(action)) Current_Refresh(action);
+  else if (confirm(action+' is non-reversable, are you sure?'))
   {
     san = document.getElementById('SiteID').value;
     statecode = document.getElementById('Statecode').value;
     process('{"ProgressSetsdt":0}');
-    if (action=='lui') d3.select('#rawtable').html('<iframe id=lui src=http://'+san+'.terminal.jupiter.hnops.net onload="javascript:(function(o){o.style.height=o.contentWindow.document.body.scrollHeight});" style="height:800px;width:100%;border:none;overflow:hidden;" ></iframe>')
     //else if (action=='wifi') $.get('http://'+san+'.terminal.jupiter.hnops.net/api/wifi/all_dev_info',function(result) {console.log(result);});
     //else if (action=='factory_reset') $.get('http://'+san+'.terminal.jupiter.hnops.net/api/wifi/run_cmd/?cmd=CMD_RESET_FACT_DEF',function(result) {alert(action+' completed');});
-    else if (action=='factory_reset') $.get('http://'+san+'.terminal.jupiter.hnops.net/api/wifi/run_cmd/?cmd=_CMD_RESET_FACT_DEF',function(result) {alert(action+' completed');});
+    if (action=='factory_reset') $.get('http://'+san+'.terminal.jupiter.hnops.net/api/wifi/run_cmd/?cmd=_CMD_RESET_FACT_DEF',function(result) {alert(action+' completed');});
     else if (action=='disable_wifi') $.get('http://'+san+'.terminal.jupiter.hnops.net/api/wifi/off',function(result) {alert(action+' completed');});
     else if (action=='enable_wifi') $.get('http://'+san+'.terminal.jupiter.hnops.net/api/wifi/on',function(result) {alert(action+' completed');});
-    else $.get('http://gtdevnadlnxvm1.hughes.com:8383?'+san+'='+action,function(result){process(result);alert(action+' completed');});
+    else if (action=='enable_wifi') $.get('http://'+san+'.terminal.jupiter.hnops.net/api/wifi/on',function(result) {alert(action+' completed');});
+    else { $.get('http://gtdevnadlnxvm1.hughes.com:8383?'+san+'='+action,function(result){process(result);alert(action+' completed');});
+           setTimeout(function() {reboot_wrapup();},120000); 
+           reinit();}
+   
   }
 }
 function clickify(content) {
@@ -188,33 +204,64 @@ function clickify(content) {
   return content;
 }
 
-function Statecode_KBA(sc='') {
-  var vsat = $('#VSAT').html();
-  var badVSAT=['No Communication'];
-  if (sc=='') { if (badVSAT.includes(vsat)) sc= vsat; else sc=$('#Statecode').html(); }
-  var content = recommend(sc);
-  if (content.includes('<br>')) d3.select('#RecommendSteps').html(clickify(content));
-  else $.get('html_statecodes/statecodes/'+sc+'_statecode.html',function(data){ $('#RecommendSteps').html(content+clickify(data));});
-  //var w=window.open('','','height=400,width=1000');
-  //w.document.open().write(content);
-  
-  //if ($('#Statecode').html() != "0.0.0" && $('#Statecode').html() != "Statecode" ) {
-  //  $.get('http://gtdevnadlnxvm1.hughes.com/html_statecodes/statecodes/'+$('#Statecode').html()+'_statecode.html',function(data) {
-  //    var w=window.open('','','height=400,width=1000');
-  //    w.document.open().write(data);
-  //    });
-  //}
+function Statecode_KBA() {
+  var sc = ''
+  if (sc=='') { sc=$('#Statecode').html(); }
+  if (sc.match(/^\d/)) {
+    var content = recommend(sc);
+    if (content.includes('<br>')) d3.select('#RecommendSteps').html(clickify(content));
+    else $.get('html_statecodes/statecodes/'+sc+'_statecode.html',function(data){ $('#RecommendSteps').html(content+clickify(data));});
+  }
+  else $.get(sc+'_statecode.html',function(data){ $('#RecommendSteps').html(data);});
 }
+
+
+function ShowKB_KBA() {
+  var sc = ''
+  if (sc=='') { sc=$('#CustomerSC').val(); }
+  if (sc.match(/^\d/)) {
+    var content = recommend(sc);
+    if (content.includes('<br>')) d3.select('#RecommendSteps').html(clickify(content));
+    else $.get('html_statecodes/statecodes/'+sc+'_statecode.html',function(data){ $('#RecommendSteps').html(content+clickify(data));});
+  }
+  else $.get(sc+'_statecode.html',function(data){ $('#RecommendSteps').html(data);});
+}
+
 
 function VSAT_KBA() {
-  if ($('#VSAT').html() != "VSAT") {
-    $.get('http://gtdevnadlnxvm1.hughes.com/html_statecodes/statecodes/'+$('#VSAT').html()+'_statecode.html',function(data) {
-      var w=window.open('','','height=400,width=1000');
-      w.document.open().write(data);
-      });
+  var sc = ''
+  var vsat = $('#VSAT').html();
+  var badVSAT=['No_Communication','Bad_Transmitter','Bad_Alignment','Bad_Receiver','UNKNOWN'];
+  if (sc=='') { if (badVSAT.includes(vsat) && VSAT) sc= vsat; else sc=$('#Statecode').html(); }
+  if (sc.match(/^\d/)) {
+    var content = recommend(sc);
+    if (content.includes('<br>')) d3.select('#RecommendSteps').html(clickify(content));
+    else $.get('html_statecodes/statecodes/'+sc+'_statecode.html',function(data){ 
+                                                                    var w=window.open('','','height=400,width=1000');
+                                                                    w.document.open().write(content+clickify(data));
+                                                                  }
+              );
   }
+  else $.get(sc+'_statecode.html',function(data){ 
+                                    var w=window.open('','','height=400,width=1000');
+                                    w.document.open().write(content+clickify(data));
+                                  });
 }
 
+//function VSAT_KBA() {
+//  if ($('#VSAT').html() != "VSAT") {
+//    $.get('http://gtdevnadlnxvm1.hughes.com/html_statecodes/statecodes/'+$('#VSAT').html()+'_statecode.html',function(data) {
+//      var w=window.open('','','height=400,width=1000');
+//      w.document.open().write(data);
+//      });
+//  }
+//}
+
+function restartTimer() {
+    count=0;
+    if (myElapsed!=null) clearInterval(myElapsed);
+    myElapsed=setInterval(Elapsed,1000);
+}
 
 function reinit(){
     data=[];
@@ -228,16 +275,14 @@ function reinit(){
     $("[id^=Devices]").each(function(){$(this).html('')})
     $("[id^=Devices]").each(function(){$(this).css('background-color', 'white')})
     $("progress").each(function() {$(this).val(0)});
-    count=0;
-    if (myElapsed!=null) clearInterval(myElapsed);
-    myElapsed=setInterval(Elapsed,1000);
+    restartTimer();
     //$("[id^=Device]").each(function(){$(this).html($(this).prop('id'))})
 }
 
 function Elapsed() {
     count++;
     $('#Elapsed').html(count);
-    if (Array.from($("[id^=Progress_]")).every(function(x) {return x.value===1})) { clearInterval(myElapsed); if ( TEST && $('#Elapsed').html()<TESTTIMEOUT) {clearTimeout(myTest); setTimeout(function() {q();test();},5000);} } 
+    if ($('#VSAT').html()=='No_Communication' || Array.from($("[id^=Progress_]")).every(function(x) {return x.value===1})) { clearInterval(myElapsed); if ( TEST && $('#Elapsed').html()<TESTTIMEOUT) {clearTimeout(myTest); setTimeout(function() {q();test();},5000);} } 
 }
 
 function SiteID(e) {
@@ -251,6 +296,7 @@ function WifiLink(band) {
     $.get('http://qa.hughes.com:8000/wifi/history/'+$('#SiteID').val()+band,function(data) {
       var w=window.open('','','height=400,width=1000');
       w.document.open().write(data);
+      w.document.title = 'Customer Network Topology - '+band;
       });
 }
 
@@ -274,12 +320,12 @@ function UsageTable() {
 
 function MOSTable() {
    if ($('#SiteID').val()=="GUE0000001037" || $('#SiteID').val()=="GUE0000001534") {
-      var w=window.open('http://qa.hughes.com:8000/whse/mos/'+$('#SiteID').val(),'','height=400,width=1000')
+      var w=window.open('http://qa.hughes.com:8000/whse/mos/'+$('#SiteID').val(),'','height=400,width=1400')
    }
 }
 
-function Current_Refresh() {
-  reinit();
+function Current_Refresh(ep='') {
+  if (ep=='') { ep='Sdtlinux,JuddSpeed,Wifi,SiteInfo,14Days'; reinit();}
   if ("WebSocket" in window) {
     //alert("WebSocket is supported by your Browser!");
     var ws = new WebSocket("ws://gtdevnadlnxvm1.hughes.com:8888/");
@@ -289,9 +335,13 @@ function Current_Refresh() {
       san = document.getElementById('SiteID').value.toUpperCase();
       $('#SiteID').val(san);
       console.log(san);
-      ws.send(san);
-      $('#Progress_Judd').val(0.1);
+      ws.send(san+'#'+ep);
+      $("progress").each(function() {
+              console.log($(this)); 
+              if (ep.includes($(this).attr('id').substring(10))) $(this).val(0)});
+      //$('#Progress_Judd').val(0.1);
       d3.select('#rawtable').html('<iframe id=lui src=http://'+san+'.terminal.jupiter.hnops.net style="height:800px;width:1000px;border:none;overflow:hidden;display:block" ></iframe>')
+      // d3.select('#Device14DayHistory').html('<iframe id=lui src=http://qa.hughes.com:3838/diagnostics style="height:800px;width:1000px;border:none;overflow:hidden;display:block" ></iframe>')
     };
 
     ws.onmessage = function(evt) {
@@ -319,22 +369,27 @@ function color_fails(message) {
 function update(key,val) {
     console.log("setting",key,"to",val, "as type", typeof(val));
     try {
-       if (typeof(val)=='string' && val.includes('flashing'))  $('#'+key).attr('onclick',"window.open('http://gtdevnadlnxvm1.hughes.com/html_statecodes/statecodes/'+ kbaKey +'_statecode.html','','resizable,height=400,width=1000');");
+       //if (typeof(val)=='string' && val.includes('flashing'))  $('#'+key).attr('onclick',"window.open('http://gtdevnadlnxvm1.hughes.com/html_statecodes/statecodes/'+ kbaKey +'_statecode.html','','resizable,height=400,width=1000');");
+       //if (typeof(val)=='string' && val.includes('flashing'))  $('#'+key).attr('onclick',"$.get(kbaKey+'_statecode.html',function(data){ $('#RecommendSteps').html(data);});");
+       if (key=='stcd_kbakey') { STCD_KBAKEY=val; console.log("STCD_KBAKEY: ",val); }
+       if (key=='vsat_kbakey') { VSAT_KBAKEY=val; console.log("VSAT_KBAKEY: ",val); }
+       if (typeof(val)=='string' && val.includes('flashing') && STCD_KBAKEY.includes(key))  $('#'+key).attr('onclick',"Statecode_KBA()");
+       if (typeof(val)=='string' && val.includes('flashing') && VSAT_KBAKEY.includes(key))  $('#'+key).attr('onclick',"VSAT_KBA()");
        if (key=='VOIP' && (val.includes('green') || val.includes('red'))) $('#'+key).attr('onclick',"MOSTable()");
        if ( val=="green" || val=="orange"  || val=="red" ||  val=="grey" || val=="black" ) {
             document.getElementById(key).style.backgroundColor=val;
             if (val=='red' && (key=='UL' || key=='DL' || key.includes('AirLink') )) $('#'+key).attr('onclick',"window.open('http://gtdevnadlnxvm1.hughes.com/ULDL.html','','resizable,height=100,width=1000');");
          }
-       else if (val=="red & flashing") $('#'+key).each(function setAnim() {$(this).animate({backgroundColor:'red'},750).animate({backgroundColor:'green'},750,setAnim);});
-       else if (val=="orange & flashing") $('#'+key).each(function setAnim() {$(this).animate({backgroundColor:'rgb(255,165,0)'},750).animate({backgroundColor:'green'},750,setAnim);});
+       else if (val=="red & flashing") $('#'+key).each(function setAnim() {$(this).animate({backgroundColor:'red'},750).animate({backgroundColor:'rgb(255,179,179'},750,setAnim);});
+       else if (val=="orange & flashing") $('#'+key).each(function setAnim() {$(this).animate({backgroundColor:'rgb(255,165,0)'},750).animate({backgroundColor:'rbg(255,219,153)'},750,setAnim);});
        //else if (key=="Statecode" && (val=="green" ||val=="orange"||val=="grey"||val=="black")) document.getElementById("Statecode").style.backgroundColor=val; 
        //else if (val=="green"||val=="red"||val=="orange"||val=="grey"||val=="black") document.getElementById(key).style.backgroundColor=val;
        else if (key.substr(0,8)=="Progress") document.getElementById(key).value=val;
-       else if (key=="RawSdt") d3.select('RawSdt').html(val);
+       //else if (key=="RawSdt") d3.select('RawSdt').html(val);
        else if (document.getElementById(key) != null) {
             document.getElementById(key).innerHTML=val;
             if ((key=='Statecode')) {kbaKey=val; $('#'+key).attr('onclick',"Statecode_KBA()");} //only clickable when red
-            if ((key=='VSAT')) {kbaKey=val; $('#'+key).attr('onclick',"Statecode_KBA()");} //only clickable when red
+            if ((key=='VSAT')) {kbaKey=val; $('#'+key).attr('onclick',"VSAT_KBA()");} //only clickable when red
 
         }
     }
