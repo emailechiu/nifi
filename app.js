@@ -123,7 +123,7 @@ function init() {
   d3.select('#Current_Refresh').attr('onclick', "Current_Refresh()");$('#Current_Refresh').css('border-radius','30px').css('border','none');
   d3.select('#History').attr('onclick', "History()");$('#History').css('border-radius','60px');
   d3.select('#Statecode').attr('onclick',"Statecode_KBA()");
-  d3.select('#VSAT').attr('onclick',"VSAT_KBA()");
+  d3.select('#VSAT').attr('onclick',"Statecode_KBA()");
   d3.select('#Device14Days').attr('onclick',"$.get('http://qa.hughes.com:8000/wifi/dev14day/'+$('#SiteID').val(), function(data) { $('#Device14DayHistory').html(data); });");
   //d3.select('#ShowKB').attr('onclick',"window.open('http://gtdevnadlnxvm1.hughes.com/html_statecodes/statecodes/'+$('#CustomerSC').val()+'_statecode.html','','resizable,height=400,width=1000');");
   d3.select('#ShowKB').attr('onclick',"ShowKB_KBA()");
@@ -144,7 +144,7 @@ function init() {
               <option value='JuddSpeedtest'>Rerun Judd SpeedTest</option> \
               <option value='Wifi'>Rerun Wifi</option> \
               <option value='SiteInfo'>Subscriptions Plan</option> \
-              <option value='lui'>LUI/WAT(proxy 66.82.3.130)</option> \
+              <option value='lui'>LUI(proxy 66.82.3.130)</option> \
               <option value='force_range'>Force Range</option> \
               <option value='clear_stats'>Clear Stats</option> \
               <option value='reload_tables'>Reload Tables</option> \
@@ -189,9 +189,10 @@ function execute(action) {
     if (action=='factory_reset') $.get('http://'+san+'.terminal.jupiter.hnops.net/api/wifi/run_cmd/?cmd=_CMD_RESET_FACT_DEF',function(result) {alert(action+' completed');});
     else if (action=='disable_wifi') $.get('http://'+san+'.terminal.jupiter.hnops.net/api/wifi/off',function(result) {alert(action+' completed');});
     else if (action=='enable_wifi') $.get('http://'+san+'.terminal.jupiter.hnops.net/api/wifi/on',function(result) {alert(action+' completed');});
-    else { $.get('http://gtdevnadlnxvm1.hughes.com:8383?'+san+'='+action,function(result){process(result);alert(action+' completed');});
-           setTimeout(function() {reboot_wrapup();},120000); 
-           reinit();}
+    else if (action=='lui') { var san = document.getElementById('SiteID').value.toUpperCase();
+    d3.select('#rawtable').html('<iframe id=lui src=http://'+san+'.terminal.jupiter.hnops.net style="height:800px;width:1000px;border:none;overflow:hidden;display:block" ></iframe>'); } 
+    else  $.get('http://gtdevnadlnxvm1.hughes.com:8383?'+san+'='+action,function(result){process(result);alert(action+' completed');});
+    if (action=='reboot'){setTimeout(function() {reboot_wrapup();},120000); reinit();}
    
   }
  document.getElementById('TOOLS').selectedIndex=0; 
@@ -205,8 +206,13 @@ function clickify(content) {
 }
 
 function Statecode_KBA() {
+  $('#RecommendSteps').attr('style','top: 20px; left: 900px; color: white; position: absolute; width: 1000px; height: 250px; background-color: black;;overflow:auto');
+  $('#RecommendSteps').html('');
   var sc = ''
-  if (sc=='') { sc=$('#Statecode').html(); }
+  var vsat = $('#VSAT').html();
+  var badVSAT=['No_Communication','Bad_Transmitter','Bad_Alignment','Bad_Receiver','UNKNOWN'];
+  if (sc=='') { if (badVSAT.includes(vsat) && VSAT) sc= vsat; else sc=$('#Statecode').html(); }
+  //if (sc=='') { sc=$('#Statecode').html(); }
   if (sc.match(/^\d/)) {
     var content = recommend(sc);
     if (content.includes('<br>')) d3.select('#RecommendSteps').html(clickify(content));
@@ -375,7 +381,7 @@ function update(key,val) {
        if (key=='stcd_kbakey') { STCD_KBAKEY=val; console.log("STCD_KBAKEY: ",val); }
        if (key=='vsat_kbakey') { VSAT_KBAKEY=val; console.log("VSAT_KBAKEY: ",val); }
        if (typeof(val)=='string' && val.includes('flashing') && STCD_KBAKEY.includes(key))  $('#'+key).attr('onclick',"Statecode_KBA()");
-       if (typeof(val)=='string' && val.includes('flashing') && VSAT_KBAKEY.includes(key))  $('#'+key).attr('onclick',"VSAT_KBA()");
+       if (typeof(val)=='string' && val.includes('flashing') && VSAT_KBAKEY.includes(key))  $('#'+key).attr('onclick',"Statecode_KBA()");
        if (key=='VOIP' && (val.includes('green') || val.includes('red'))) $('#'+key).attr('onclick',"MOSTable()");
        if ( val=="green" || val=="orange"  || val=="red" ||  val=="grey" || val=="black" ) {
             document.getElementById(key).style.backgroundColor=val;
@@ -390,7 +396,7 @@ function update(key,val) {
        else if (document.getElementById(key) != null) {
             document.getElementById(key).innerHTML=val;
             if ((key=='Statecode')) {kbaKey=val; $('#'+key).attr('onclick',"Statecode_KBA()");} //only clickable when red
-            if ((key=='VSAT')) {kbaKey=val; $('#'+key).attr('onclick',"VSAT_KBA()");} //only clickable when red
+            if ((key=='VSAT')) {kbaKey=val; $('#'+key).attr('onclick',"Statecode_KBA()");} //only clickable when red
 
         }
     }

@@ -1,27 +1,23 @@
 <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
-<style>
-  div {display:none;} 
-  div#Obstruction {display:block;}
-</style>
-<div id=Obstruction>
+<div style="display:block" id=Obstruction>
   <h2>Does the customer know of any Dish Obstructions?</h2>
   <button type=submit next=Obstruction_yes>yes</button> 
   <button type=submit next=Obstruction_no>no</button>
 </div>
-<div id=Obstruction_yes>
+<div style="display:none" id=Obstruction_yes>
   <h2>1. Please inform the customer to have the Obstruction removed.</h2>
   <h2>2. Close case with resolution "Educated Customer"</h2>
 </div>
-<div id=Obstruction_no>
+<div style="display:none" id=Obstruction_no>
   <h2>Is IFL cable securely attached to Terminal?</h2>
   <button type=submit next=IFL_Yes>yes</button> 
   <button type=submit next=IFL_No>no</button>
 </div>
-<div id=IFL_Yes>
+<div style="display:none" id=IFL_Yes>
   <h2>Dispatch-Replace ODU - use KB 8985</h2>
   <h2>External Users: Use your field service process</h2>
 </div>
-<div id=IFL_No>
+<div style="display:none" id=IFL_No>
   <h2>1. Please ask the customer to Tighten the IFL Connector.</h2>
   <h2>2. Run SDT to confirm diagnosis.</h2>
   <button type=submit onclick='execute("reboot")'>Run SDT - Reboot</button>
@@ -35,6 +31,6 @@ function next(thisObj) {
   $('#'+from).toggle();
   $('#'+to).toggle();
 }
-window.onload=$('button').attr('onclick','next($(this))');
+$('div #RecommendSteps button').attr('onclick','next($(this))');
 //$('button').each(function() {$(this).attr('onclick','next($(this))');})
 </script>
